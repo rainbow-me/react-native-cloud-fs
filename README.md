@@ -132,6 +132,9 @@ if (Platform.OS === 'android') {
   if (!isSignedIn) {
     await GoogleSignin.signIn();
   }
+
+  // Syncs signed in state to RNCloudFS
+  await RNCloudFS.loginIfNeeded();
   
   // Now you can copy to cloud
   await RNCloudFS.copyToCloud({
