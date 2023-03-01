@@ -133,6 +133,21 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
     }
 
     @ReactMethod
+    public void isLoggedIn(final Promise promise){
+        if (mDriveServiceHelper == null) {
+            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this.reactContext);
+
+            if (account == null) {
+                promise.resolve(false);
+            } else {
+                promise.resolve(true);
+            }
+        }  else {
+            promise.resolve(true);
+        }
+    }
+
+    @ReactMethod
     public void loginIfNeeded(final Promise promise){
         if (mDriveServiceHelper == null) {
             // Check for already logged in account
