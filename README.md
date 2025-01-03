@@ -98,7 +98,7 @@ _scope_: a string to specify if the files are the user-visible documents (`visib
 
 
 ## Android
-
+****
 After following the instructions in [Getting started](./docs/getting-started.md) I recommend using [react-native-google-signin](https://github.com/react-native-google-signin/google-signin) to authenticate the user, especially if you need additional scopes besides `auth/drive.file` which is the only scope this package requests, and let that package handle auth.
 
 Example of usage on Android:
