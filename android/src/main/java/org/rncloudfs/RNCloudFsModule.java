@@ -401,7 +401,7 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
     }
 
     @ReactMethod
-    public void getCurrentlySignedInUserData(Promise promise, ReadableMap options) {
+    public void getCurrentlySignedInUserData(ReadableMap options, Promise promise) {
         Log.d(TAG, "Getting currently signed in user data");
 
         boolean checkPermissions = options.hasKey("checkPermissions") && options.getBoolean("checkPermissions");
