@@ -401,8 +401,10 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
     }
 
     @ReactMethod
-    public void getCurrentlySignedInUserData(Promise promise) {
-        Log.d(TAG, "Logging out");
+    public void getCurrentlySignedInUserData(ReadableMap options, Promise promise) {
+        Log.d(TAG, "Getting currently signed in user data");
+
+        boolean checkPermissions = options.hasKey("checkPermissions") && options.getBoolean("checkPermissions");
 
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this.reactContext);
         if (account == null) {
@@ -413,7 +415,17 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
             resultData.putString("email", account.getEmail());
             resultData.putString("name", account.getDisplayName());
             resultData.putString("avatarUrl", photoUrl != null ? photoUrl.toString() : null);
-            promise.resolve(resultData);
+
+            if (checkPermissions) {
+                Scope[] s = new Scope[]{new Scope(DriveScopes.DRIVE_APPDATA)};
+                if (!GoogleSignIn.hasPermissions(account, s)) {
+                    promise.resolve(null);
+                } else {
+                    promise.resolve(resultData);
+                }
+            } else {
+                promise.resolve(resultData);
+            }
         }
     }
 
