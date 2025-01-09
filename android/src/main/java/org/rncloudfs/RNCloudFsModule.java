@@ -37,7 +37,6 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -49,7 +48,8 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
-public class RNCloudFsModule extends ReactContextBaseJavaModule implements GoogleApiClient.OnConnectionFailedListener, LifecycleEventListener, ActivityEventListener {
+public class RNCloudFsModule extends ReactContextBaseJavaModule
+        implements GoogleApiClient.OnConnectionFailedListener, LifecycleEventListener, ActivityEventListener {
     public static final String TAG = "RNCloudFs";
     private static final int REQUEST_CODE_SIGN_IN = 1;
     private static final int REQUEST_CODE_OPEN_DOCUMENT = 2;
@@ -79,7 +79,7 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
     }
 
     /**
-     * android only method.  Just here to test the connection logic
+     * android only method. Just here to test the connection logic
      */
     @ReactMethod
     public void reset(final Promise promise) {
@@ -97,11 +97,11 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
                         promise.resolve(exists);
 
                     })
-                    .addOnFailureListener(exception ->{
-                        try{
-                            UserRecoverableAuthIOException e = (UserRecoverableAuthIOException)exception;
+                    .addOnFailureListener(exception -> {
+                        try {
+                            UserRecoverableAuthIOException e = (UserRecoverableAuthIOException) exception;
                             this.reactContext.startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION, null);
-                        } catch(Exception e){
+                        } catch (Exception e) {
                             Log.e(TAG, "Couldn't read file.", exception);
                             promise.reject(exception);
                         }
@@ -120,11 +120,11 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
                         promise.resolve(deleted);
 
                     })
-                    .addOnFailureListener(exception ->{
-                        try{
-                            UserRecoverableAuthIOException e = (UserRecoverableAuthIOException)exception;
+                    .addOnFailureListener(exception -> {
+                        try {
+                            UserRecoverableAuthIOException e = (UserRecoverableAuthIOException) exception;
                             this.reactContext.startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION, null);
-                        } catch(Exception e){
+                        } catch (Exception e) {
                             Log.e(TAG, "Couldn't delete file.", exception);
                             promise.reject(exception);
                         }
@@ -133,7 +133,7 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
     }
 
     @ReactMethod
-    public void loginIfNeeded(final Promise promise){
+    public void loginIfNeeded(final Promise promise) {
         if (mDriveServiceHelper == null) {
             // Check for already logged in account
             GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this.reactContext);
@@ -145,23 +145,21 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
             } else {
                 // Restore mDriveServiceHelper
                 // Use the authenticated account to sign in to the Drive service.
-                GoogleAccountCredential credential =
-                        GoogleAccountCredential.usingOAuth2(
-                                this.reactContext, Collections.singleton(DriveScopes.DRIVE_APPDATA));
+                GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
+                        this.reactContext, Collections.singleton(DriveScopes.DRIVE_APPDATA));
                 credential.setSelectedAccount(account.getAccount());
-                Drive googleDriveService =
-                        new Drive.Builder(
-                                AndroidHttp.newCompatibleTransport(),
-                                new GsonFactory(),
-                                credential)
-                                .build();
+                Drive googleDriveService = new Drive.Builder(
+                        AndroidHttp.newCompatibleTransport(),
+                        new GsonFactory(),
+                        credential)
+                        .build();
 
                 // The DriveServiceHelper encapsulates all REST API and SAF functionality.
                 // Its instantiation is required before handling any onClick actions.
                 mDriveServiceHelper = new DriveServiceHelper(googleDriveService);
                 promise.resolve(true);
             }
-        }  else {
+        } else {
             promise.resolve(true);
         }
     }
@@ -173,7 +171,9 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
             WritableArray files = new WritableNativeArray();
             WritableMap result = new WritableNativeMap();
 
-            boolean useDocumentsFolder = options.hasKey("scope") ? options.getString("scope").toLowerCase().equals("visible") : true;
+            boolean useDocumentsFolder = options.hasKey("scope")
+                    ? options.getString("scope").toLowerCase().equals("visible")
+                    : true;
             try {
 
                 mDriveServiceHelper.queryFiles(useDocumentsFolder)
@@ -191,7 +191,9 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
                         })
                         .addOnFailureListener(exception -> {
                             clearPendingOperations();
-                            Log.e(TAG, "Unable to query files: " + exception.getCause().getMessage());
+                            if (exception != null) {
+                                Log.e(TAG, "Unable to query files: " + exception.getCause().getMessage());
+                            }
                             try {
                                 UserRecoverableAuthIOException e = (UserRecoverableAuthIOException) exception;
                                 mPendingPromise = promise;
@@ -222,8 +224,9 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
      * Copy the source into the google drive database
      */
     @ReactMethod
-    public void copyToCloud(ReadableMap options, final Promise promise) throws ExecutionException, InterruptedException {
-        if(mDriveServiceHelper != null){
+    public void copyToCloud(ReadableMap options, final Promise promise)
+            throws ExecutionException, InterruptedException {
+        if (mDriveServiceHelper != null) {
             if (!options.hasKey("sourcePath")) {
                 promise.reject("error", "sourcePath not specified");
             }
@@ -249,7 +252,9 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
                 mimeType = options.getString("mimetype");
             }
 
-            boolean useDocumentsFolder = options.hasKey("scope") ? options.getString("scope").toLowerCase().equals("visible") : true;
+            boolean useDocumentsFolder = options.hasKey("scope")
+                    ? options.getString("scope").toLowerCase().equals("visible")
+                    : true;
 
             String actualMimeType;
             if (mimeType == null) {
@@ -321,7 +326,7 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
         System.out.println("RNCloudFsModule.onNewIntent");
     }
 
-    public void clearPendingOperations(){
+    public void clearPendingOperations() {
         mPendingOperation = null;
         mPendingPromise = null;
         mPendingOptions = null;
@@ -366,7 +371,8 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
                 } else if (resultCode == Activity.RESULT_CANCELED && mPendingPromise != null) {
                     mPendingPromise.reject("canceled", "User canceled");
                 } else if (mPendingPromise != null) {
-                    mPendingPromise.reject("unknown error", "Operation failed: " + mPendingOperation + " result code " + resultCode);
+                    mPendingPromise.reject("unknown error",
+                            "Operation failed: " + mPendingOperation + " result code " + resultCode);
                 }
                 break;
         }
@@ -389,11 +395,10 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
     public void requestSignIn() {
         Log.d(TAG, "Requesting sign-in");
 
-        GoogleSignInOptions signInOptions =
-                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestEmail()
-                        .requestScopes(new Scope(DriveScopes.DRIVE_FILE))
-                        .build();
+        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestScopes(new Scope(DriveScopes.DRIVE_FILE))
+                .build();
         GoogleSignInClient client = GoogleSignIn.getClient(this.reactContext, signInOptions);
 
         // The result of the sign-in Intent is handled in onActivityResult.
@@ -417,7 +422,7 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
             resultData.putString("avatarUrl", photoUrl != null ? photoUrl.toString() : null);
 
             if (checkPermissions) {
-                Scope[] s = new Scope[]{new Scope(DriveScopes.DRIVE_APPDATA)};
+                Scope[] s = new Scope[] { new Scope(DriveScopes.DRIVE_APPDATA) };
                 if (!GoogleSignIn.hasPermissions(account, s)) {
                     promise.resolve(null);
                 } else {
@@ -434,25 +439,25 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
 
         Log.d(TAG, "Requesting sign-in");
 
-        GoogleSignInOptions signInOptions =
-                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestEmail()
-                        .requestScopes(new Scope(DriveScopes.DRIVE_FILE))
-                        .build();
+        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestScopes(new Scope(DriveScopes.DRIVE_FILE))
+                .build();
         GoogleSignInClient client = GoogleSignIn.getClient(this.reactContext, signInOptions);
         mDriveServiceHelper = null;
         client.signOut()
-                .addOnSuccessListener( result -> {
+                .addOnSuccessListener(result -> {
                     promise.resolve(true);
                 })
-                .addOnFailureListener(exception ->{
+                .addOnFailureListener(exception -> {
                     Log.e(TAG, "Couldn't log out.", exception);
                     promise.reject(exception);
                 });
     }
 
     /**
-     * Handles the {@code result} of a completed sign-in activity initiated from {@link
+     * Handles the {@code result} of a completed sign-in activity initiated from
+     * {@link
      * #requestSignIn()} ()}.
      */
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
@@ -461,30 +466,29 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
             Log.d(TAG, "Signed in as " + googleAccount.getEmail());
 
             // Use the authenticated account to sign in to the Drive service.
-            GoogleAccountCredential credential =
-                    GoogleAccountCredential.usingOAuth2(
-                            this.reactContext, Collections.singleton(DriveScopes.DRIVE_APPDATA));
+            GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
+                    this.reactContext, Collections.singleton(DriveScopes.DRIVE_APPDATA));
             credential.setSelectedAccount(googleAccount.getAccount());
-            Drive googleDriveService =
-                    new Drive.Builder(
-                            AndroidHttp.newCompatibleTransport(),
-                            new GsonFactory(),
-                            credential)
-                            .build();
+            Drive googleDriveService = new Drive.Builder(
+                    AndroidHttp.newCompatibleTransport(),
+                    new GsonFactory(),
+                    credential)
+                    .build();
 
             // The DriveServiceHelper encapsulates all REST API and SAF functionality.
             // Its instantiation is required before handling any onClick actions.
             mDriveServiceHelper = new DriveServiceHelper(googleDriveService);
 
-            if(this.signInPromise != null){
+            if (this.signInPromise != null) {
                 this.signInPromise.resolve(true);
                 this.signInPromise = null;
             }
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            // Please refer to the GoogleSignInStatusCodes class reference for more
+            // information.
             Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
-            if(this.signInPromise != null){
+            if (this.signInPromise != null) {
                 this.signInPromise.reject("signInResult:" + e.getStatusCode(), e.getMessage());
                 this.signInPromise = null;
             }
@@ -492,7 +496,8 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
     }
 
     /**
-     * Retrieves the title and content of a file identified by {@code fileId} and populates the UI.
+     * Retrieves the title and content of a file identified by {@code fileId} and
+     * populates the UI.
      */
     @ReactMethod
     public void getGoogleDriveDocument(String fileId, Promise promise) {
@@ -504,17 +509,16 @@ public class RNCloudFsModule extends ReactContextBaseJavaModule implements Googl
                         promise.resolve(content);
 
                     })
-                    .addOnFailureListener(exception ->{
-                        try{
-                            UserRecoverableAuthIOException e = (UserRecoverableAuthIOException)exception;
+                    .addOnFailureListener(exception -> {
+                        try {
+                            UserRecoverableAuthIOException e = (UserRecoverableAuthIOException) exception;
                             this.reactContext.startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION, null);
-                        } catch(Exception e){
+                        } catch (Exception e) {
                             Log.e(TAG, "Couldn't read file.", exception);
                             promise.reject(exception);
                         }
                     });
         }
     }
-
 
 }
