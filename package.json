@@ -2,13 +2,21 @@
   "name": "react-native-cloud-fs",
   "version": "2.6.2",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
+  "types": "index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "tsc --outDir ./dist"
   },
   "keywords": [
     "react-native"
   ],
   "author": "",
-  "license": ""
+  "license": "",
+  "dependencies": {
+    "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "react-native": "^0.77.0"
+  }
 }
