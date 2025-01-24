@@ -11,7 +11,7 @@ export interface ListFilesResult {
 
 interface RNCloudFSMethods {
   logout(): Promise<void>;
-  loginIfNeeded(): Promise<void>;
+  loginIfNeeded(): Promise<void>; // Android only
   listFiles(listFilesParams: {
     scope: String;
     targetPath: string;
@@ -20,7 +20,7 @@ interface RNCloudFSMethods {
   copyToCloud(copyToCloudParams: {
     mimeType: string;
     scope: string;
-    sourcePath: { path: string };
+    sourcePath: { path: string } | { uri: string };
     targetPath: string;
   });
   fileExists(fileExistsParam: {
@@ -32,6 +32,13 @@ interface RNCloudFSMethods {
   getGoogleDriveDocument(id: string): Promise<string>; // android only
   syncCloud(): Promise<boolean>; // iOS only
   isAvailable(): Promise<boolean>; // iOS only
+
+  // Android only
+  downloadFile(params: {
+    fileId: string;
+    destinationPath?: string; // if not provided, file will be downloaded to the app's cache directory
+    fileName?: string; // if not provided, file will be downloaded with fileId as name
+  });
 }
 
 declare const RNCloudFS: RNCloudFSMethods;
